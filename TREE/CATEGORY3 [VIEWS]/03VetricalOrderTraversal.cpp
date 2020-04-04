@@ -1,48 +1,72 @@
+typedef std::pair<std::pair<int, int>, int> dPair;
+bool myCompare(const dPair& a, const dPair& b) {
+    if (a.first.first < b.first.first)
+        return true;
+    else if (a.first.first > b.first.first)
+        return false;
+    else {
+        if (a.first.second < b.first.second)
+            return true;
+        else if (a.first.second > b.first.second)
+            return false;
+        else 
+            return a.second < b.second;
+    }
+}
 typedef std::pair<int, TreeNode*> ipair;
 vector<vector<int> > verticalTraversalUtil(TreeNode* root) {
-    vector<vector<int> > res;
-    std::unordered_map<int, vector<int> >map1;
+    vector<vector<int> > result;
+    vector<std::pair<std::pair<int, int>, int> > tempRes;
     if (root == nullptr)
-        return res;
+        return result;
+    int hzLevel = 0;
     
     std::queue<ipair> q;
     q.push(std::make_pair(0,root));
+    q.push(std::make_pair(0,nullptr));
+    
     while (!q.empty()) {
         ipair curr = q.front();
         q.pop();
-
+    
         int vLevel = curr.first;
         TreeNode* node = curr.second;
-
-        if (map1.count(vLevel) == false) {
-            map1.insert({vLevel, std::vector<int>{}});
+        if (node == nullptr) {
+            hzLevel++;
+            if (!q.empty())
+                q.push(std::make_pair(0,nullptr));
+            continue;
         }
-        map1[vLevel].push_back(node->val);
-
+        
+        tempRes.push_back(std::make_pair(std::make_pair(vLevel,hzLevel), node->val));
+        
         if(node->left)
             q.push(std::make_pair(vLevel-1, node->left));
         
         if (node->right)
             q.push(std::make_pair(vLevel+1, node->right));
-
-    }
-    int minLevel = 0;
-    int maxLevel = 0;
-    //iterate over map and find the min and max levels
-    for (auto iter = map1.begin(); iter != map1.end(); iter++) {
-        if (iter->first < minLevel)
-            minLevel = iter->first;
         
-        if (iter->first > maxLevel)
-            maxLevel = iter->first;
+
+    }
+    
+    
+    std::sort(tempRes.begin(), tempRes.end(), myCompare);
+    
+    int pvLevel = -1000;
+    int vLevel = -1;
+    int minLevel = tempRes.begin()->first.first;
+    for (auto iter = tempRes.begin(); iter != tempRes.end(); iter++) {
+        vLevel = iter->first.first;
+        if (vLevel == pvLevel) {
+            result[vLevel-minLevel].push_back(iter->second);
+        } else {
+            result.push_back(vector<int>{});
+            result[vLevel-minLevel].push_back(iter->second);
+        }
+        pvLevel = vLevel;
     }
 
-
-    for (int level = minLevel; level <= maxLevel; level++) {
-        res.push_back(map1[level]);
-    }
-
-    return res;
+    return result;
 }
 class Solution {
 public:
