@@ -13,10 +13,10 @@ public:
     void serialize(TreeNode* root, ostringstream& res) {
         if (root == nullptr)
         {
-            res << 'N' ;
+            res << "# " ;
             return;
         }
-        res << "," << std::to_string(root->val);
+        res << std::to_string(root->val) << " ";
         serialize(root->left, res);
         serialize(root->right, res);
     }
@@ -26,39 +26,33 @@ public:
         string res;
         ostringstream os;
         serialize(root, os);
-        os << "#";
         return os.str();
     }
     
 
     
-    void deserialize(istringstream& is, TreeNode*& root) {
-        char ch;
-        is >> ch;
-        if (ch == '#' || ch == 'N') {
-            return;
+    TreeNode* deserialize(istringstream& is) {
+        string str;
+        is >> str;
+        if (str == "#") {
+            return nullptr;
         }
-        int val;
-        is >> val;
-        
-        root = new TreeNode(val);
-        deserialize(is, root->left);
-        deserialize(is, root->right);
+        TreeNode* root = new TreeNode(stoi(str));
+        root->left = deserialize(is);
+        root->right = deserialize(is);
+        return root;
     }
     
     // Decodes your encoded data to tree.
     TreeNode* deserialize(string data) {
         istringstream is(data);
-        TreeNode* root = nullptr;
-        deserialize(is, root);
-        return root;
+        return deserialize(is);
     }
 };
 
 // Your Codec object will be instantiated and called as such:
 // Codec codec;
 // codec.deserialize(codec.serialize(root));
-
 
 
 /**
